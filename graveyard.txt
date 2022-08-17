@@ -1,0 +1,21 @@
+fn create_test_image() {
+    let mut image: RgbImage = ImageBuffer::new(IMG_WIDTH, IMG_HEIGHT);
+
+    println!("** Lines rendered **");
+    let bar = ProgressBar::new(IMG_HEIGHT.into());
+    for j in (0..IMG_HEIGHT).rev() {
+        for i in 0..IMG_WIDTH {
+
+            let colour = Vec3::new(
+            i as f64 / (IMG_WIDTH - 1) as f64,
+            j as f64 / (IMG_HEIGHT - 1) as f64,
+            0.25 as f64
+            );
+
+            *image.get_pixel_mut(i, IMG_HEIGHT - j - 1) = image::Rgb(Vec3::to_colour(&colour));
+
+        } bar.inc(1)
+    }
+    bar.finish();
+    image.save("testImage.png").unwrap();
+}
