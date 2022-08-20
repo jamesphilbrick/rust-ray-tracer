@@ -29,7 +29,7 @@ use ray::Ray;
 // may be beneficial to read in the setup parameters from a json file
 // image setup
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMG_WIDTH: u32 = 400;
+const IMG_WIDTH: u32 = 800;
 const IMG_HEIGHT: u32 = (IMG_WIDTH as f64 / ASPECT_RATIO) as u32;
 
 // camera definition
@@ -38,23 +38,28 @@ const VIEWPORT_WIDTH: f64 = ASPECT_RATIO * VIEWPORT_HEIGHT;
 const FOCAL_LENGTH: f64 = 1.0;
 
 fn ray_colour(r: Ray) -> Vec3 {
-    if hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, r) {
-        return Vec3::new(1.0, 0.0, 0.0);
+    let t = hit_sphere(Vec3::new(0.0, 0.0, -1.0), 0.5, r);
+    // return Vec3::new(1.0, 0.0, 0.0);
+    if t > 0.0 {
+        let n: Vec3 = Vec3::normalise(&(r.at(t) - Vec3::new(0.0, 0.0, -1.0)));
+        return Vec3::new(n.x+1.0, n.y+1.0, n.z+1.0) * 0.5;
     }
-    else {
-        let unit_direction: Vec3 = Vec3::normalise(&r.direction);
-        let t: f64 = 0.5 * (unit_direction.y + 1.0); 
-        return Vec3::new(1.0, 1.0, 1.0)*(1.0 - t) + Vec3::new(0.5, 0.7, 1.0)*t;
-    }
+    let unit_direction: Vec3 = Vec3::normalise(&r.direction);
+    let t: f64 = 0.5 * (unit_direction.y + 1.0); 
+    return Vec3::new(1.0, 1.0, 1.0)*(1.0 - t) + Vec3::new(0.5, 0.7, 1.0)*t;
 }
 
-fn hit_sphere(center: Vec3, radius: f64, r: Ray) -> bool {
+fn hit_sphere(center: Vec3, radius: f64, r: Ray) -> f64 {
     let oc: Vec3 = r.origin - center;
-    let a: f64 = Vec3::dot(&r.direction, &r.direction);
-    let b: f64 = Vec3::dot(&oc, &r.direction) * 2.0;
+    let a: f64 = Vec3::dot(&r.direction, &r.direction); // this can be simplifed
+    let half_b: f64 = Vec3::dot(&oc, &r.direction);
     let c: f64 = Vec3::dot(&oc, &oc) - (radius*radius);
-    let discrim = b*b - a*c*4.0;
-    return (discrim > 0.0);
+    let discrim = half_b*half_b - a*c;
+    if discrim < 0.0 {
+        return -1.0;
+    } else {
+        return (-half_b - discrim.sqrt()) / a;
+    }
 }
 
 fn render() {

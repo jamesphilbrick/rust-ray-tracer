@@ -52,7 +52,8 @@ impl Vec3 {
     }
 
     pub fn normalise(v: &Vec3) -> Vec3 {
-        let mag = Vec3::magnitude(&v).abs();
+        // let mag = Vec3::magnitude(&v).abs();
+        let mag = Vec3::magnitude(&v);
         Vec3 {
             x: v.x / mag,
             y: v.y / mag,
